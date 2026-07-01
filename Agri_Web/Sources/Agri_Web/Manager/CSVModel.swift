@@ -240,7 +240,7 @@ class CSVModel {
     func uploadFiles(for tasks: [UploadTask]) async {
         for task in tasks {
             do {
-                let content = try String(contentsOf: url, encoding: .utf8)
+                let content = try String(contentsOf: task.url, encoding: .utf8)
                 let data = try EnumeratedCSV(string: content, loadColumns: false)
 
                 let isolatedHeaders = CSVHeader.createHeaders(data: data.header)
