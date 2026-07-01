@@ -239,10 +239,6 @@ class CSVModel {
     // MARK: - Multi-file upload
     func uploadFiles(for tasks: [UploadTask]) async {
         for task in tasks {
-            let url = task.url
-            guard url.startAccessingSecurityScopedResource() else { continue }
-            defer { url.stopAccessingSecurityScopedResource() }
-
             do {
                 let content = try String(contentsOf: url, encoding: .utf8)
                 let data = try EnumeratedCSV(string: content, loadColumns: false)
