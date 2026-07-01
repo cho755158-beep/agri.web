@@ -30,7 +30,6 @@ RUN mkdir /staging
 RUN --mount=type=cache,target=/build/.build \
     swift build -c release \
         --product Agri_Web \
-        --static-swift-stdlib \
         -Xlinker -ljemalloc && \
     # Copy main executable to staging area
     cp "$(swift build -c release --show-bin-path)/Agri_Web" /staging && \
