@@ -3,61 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Web Portal</title>
+    <title>Web Portal - Agribank</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        html,body {width: 100%; height: 100%;overflow: hidden; margin: 0; padding: 0;}
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; padding: 6px; height: 100vh;}
-        /* Ẩn màn hình chính lúc mới vào */
-        #login-screen {
-            display: flex;
-            padding: 0px 0px 20px 0px;
+        /* Đặt lại lề và font chữ toàn cục */
+        html, body {
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            margin: 0; 
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            background-color: #f3f4f6;
         }
 
-        #main-screen {
-            display: none;
-            padding: 0px 0px 20px 0px;
+        /* KHU VỰC THANH CÔNG CỤ (TOP BAR) - Tone Xanh Rêu Agribank */
+        .header-panel {
+            background-color: #5f0a0a; /* Màu xanh rêu đặc trưng */
+            padding: 16px 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10;
+            border-bottom: 4px solid #FFDD00; /* Dải nhấn màu Vàng kim */
         }
+
+        /* Màn hình Đăng nhập */
+        #login-screen {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Kẻ line mờ mờ trên nền tối */
+        }
+
+        /* Màu chữ thông báo trắng/sáng để nổi trên nền Xanh rêu */
+        #login-status {
+            margin: 0; 
+            color: #f3f4f6; 
+            font-size: 14px;
+        }
+
+        /* Màn hình chức năng chính */
+        #main-screen {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Chữ của phần Bảng tính */
+        label[for="screen-type"] {
+            font-weight: 500; 
+            color: #ffffff; /* Đổi sang màu trắng */
+        }
+
+        /* LÀM ĐẸP NÚT BẤM THEO BRANDING */
+        button { 
+            padding: 8px 16px; 
+            border: none; 
+            border-radius: 6px; 
+            background-color: #eaff00; /* Đỏ booc-đô Agribank */
+            color: black;
+            font-weight: 600;
+            cursor: pointer; 
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        button:hover { 
+            background-color: #abc448; /* Tối đi một chút khi hover */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #btn-google-login {
+            background-color: white;
+            color: #053E2B; /* Chữ xanh rêu */
+            border: 2px solid transparent;
+        }
+        #btn-google-login:hover { 
+            background-color: #f9fafb; 
+            border: 2px solid #FFDD00; /* Viền vàng khi hover */
+        }
+
+        /* Căn chỉnh Select và Input File */
+        select, input[type="file"] {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background-color: white;
+            font-size: 14px;
+            color: #374151;
+            outline: none;
+        }
+        
+        /* Hiệu ứng focus vào Input/Select dùng màu Vàng kim */
+        select:focus, input[type="file"]:focus {
+            border-color: #FFDD00;
+            box-shadow: 0 0 0 2px rgba(255, 221, 0, 0.3);
+        }
+
+        /* Bỏ viền mặc định xấu xí của input type file trên một số trình duyệt */
+        input[type="file"]::file-selector-button {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            background-color: #f9fafb;
+            color: #374151;
+            cursor: pointer;
+            margin-right: 8px;
+            transition: background-color 0.2s;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* KHU VỰC HIỂN THỊ IFRAME */
         #web-viewer {
             flex: 1 1 auto;
             display: flex;
-            overflow: hidden;
-            min-height: 0;
+            padding: 20px;
         }
+        
         #web-frame {
             flex: 1;
             border: none;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        button { padding: 10px 16px; border: 1px solid #ccc; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;}
-        button:hover { background: #f0f0f0; }
-        .file-input-group { margin-top: 20px; display: flex; gap: 10px; align-items: center; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <button id="btn-google-login">Đăng nhập với Google</button>
-        <p id="login-status"></p>
-    </div>
-
-    <div id="main-screen">
-        <div>
-            <label for="screen-type">Bảng tính: </label>
-            <select id="screen-type">
-                <option value="accruedExpense">Dự chi</option>
-                <option value="accruedIncome">Dự thu</option>
-            </select>
+    <div class="header-panel">
+        
+        <div id="login-screen">
+            <button id="btn-google-login">Đăng nhập với Google</button>
+            <p id="login-status"></p>
         </div>
 
-        <div class="file-input-group">
-            <input type="file" id="file-local-1" accept=".csv" />
-            <input type="file" id="file-local-2" accept=".csv" />
-            <button id="btn-upload">Tải lên</button>
+        <div id="main-screen">
+            <div class="control-group">
+                <label for="screen-type">Bảng tính: </label>
+                <select id="screen-type">
+                    <option value="accruedExpense">Dự chi</option>
+                    <option value="accruedIncome">Dự thu</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <input type="file" id="file-local-1" accept=".csv" />
+                <input type="file" id="file-local-2" accept=".csv" />
+                <button id="btn-upload">Tải lên</button>
+            </div>
         </div>
+
     </div>
+    
     <div id="web-viewer">
-        <iframe id="web-frame" width="100%" height="100%" style="border:none;">
-    </iframe>
+        <iframe id="web-frame" width="100%" height="100%"></iframe>
     </div>
 
     <script src="app.js"></script>
