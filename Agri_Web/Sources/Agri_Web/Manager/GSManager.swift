@@ -341,10 +341,6 @@ class GSManager {
                     fields: "userEnteredValue",
                     start: GSGridCoordinate(sheetId: tabID, rowIndex: markerRow - 1, columnIndex: colIndex)
                 )))
-
-        // Execute actions together in a single sequential network call
-        let url = URL(string: "\(baseURL)/\(sheetID):batchUpdate")!
-        let body: [String: Any] = ["requests": batchRequests]
         
         do {
             let token = try await req.tokenManager.getValidAccessToken(req: req)
