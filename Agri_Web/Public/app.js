@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://0.0.0.0:8080';
+const API_BASE_URL = process.env.PORT;
 
 const loginScreen = document.getElementById('login-screen');
 const mainScreen = document.getElementById('main-screen');
