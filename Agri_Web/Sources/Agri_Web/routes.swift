@@ -1,10 +1,8 @@
 import Vapor
 
-struct GoogleUserInfo: Content {
-    let id: String
-    let email: String
-    let name: String
-    let picture: String?
+struct LoginState: Content {
+    let signedIn: Bool
+    let accessToken: String
 }
 
 func routes(_ app: Application) throws {
@@ -25,21 +23,11 @@ func routes(_ app: Application) throws {
     
     let protected = api.grouped(GoogleAuthMiddleware())
     
-    protected.get("me") { req async throws -> GoogleUserInfo in
+    protected.get("me") { req async throws -> LoginState in
         let token = try await req.tokenManager.getValidAccessToken(req: req)
-        
-        let uri = URI(string: "https://www.googleapis.com/oauth2/v2/userinfo")
-                let response = try await req.client.get(uri) { clientReq in
-                    clientReq.headers.bearerAuthorization = .init(token: token)
-                }
-        
-        guard response.status == .ok else {
-                    req.logger.error("Error: \(response.status)")
-                    throw Abort(.internalServerError, reason: "Couldn't find User Info")
-                }
-        
-        let userInfo = try response.content.decode(GoogleUserInfo.self)
-                
-        return userInfo
+        return LoginState(
+            signedIn: true,
+            accessToken: token
+        )
     }
 }
