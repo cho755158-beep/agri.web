@@ -38,7 +38,7 @@ struct OAuthController: RouteCollection, Sendable {
         
         req.session.data["oauth_state"] = nil
         
-        return req.redirect(to: "/dashboard")
+        return req.redirect(to: "/")
     }
     
     @Sendable
