@@ -7,16 +7,6 @@
 
 import Vapor
 
-struct GoogleUserInfo: Content {
-    let sub: String
-    let name: String
-    let given_name: String?
-    let family_name: String?
-    let picture: String?
-    let email: String
-    let email_verified: Bool?
-}
-
 struct GoogleOAuthResponse: Content {
     let access_token: String
     let refresh_token: String?
@@ -47,13 +37,23 @@ public class TokenManager {
         guard let clientID = Environment.get("CLIENT_ID"),
               let clientSecret = Environment.get("CLIENT_SECRET"),
               let redirectURI = Environment.get("REDIRECT_URI") else {
-            fatalError("Thiếu biến môi trường: CLIENT_ID, CLIENT_SECRET, REDIRECT_URI")
+            fatalError("Missing: CLIENT_ID, CLIENT_SECRET, REDIRECT_URI")
         }
         
         self.clientID = clientID
         self.clientSecret = clientSecret
         self.redirectURI = redirectURI
     }
+    
+    // Debugging
+//    public init() {
+//        self.clientID = Environment.get("CLIENT_ID")
+//            ?? ""
+//        self.clientSecret = Environment.get("CLIENT_SECRET")
+//            ?? ""
+//        self.redirectURI = Environment.get("REDIRECT_URI")
+//            ?? ""
+//    }
     
     func getAuthURL(state: String) -> String {
         return "https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=\(clientID)&redirect_uri=\(redirectURI)&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fspreadsheets%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fgmail.readonly&state=\(state)&access_type=offline&prompt=consent"
@@ -80,16 +80,6 @@ public class TokenManager {
         
         let tokenData = try response.content.decode(GoogleOAuthResponse.self)
         let expireAt = Date().addingTimeInterval(tokenData.expires_in).timeIntervalSince1970
-
-        let userResponse = try await req.client.get(URI(string: "https://openidconnect.googleapis.com/v1/userinfo")) { clientReq in
-            clientReq.headers.bearerAuthorization = .init(token: tokenData.access_token)
-        }
-
-        guard userResponse.status == .ok else {
-            throw Abort(.badRequest, reason: "Couldn't fetch Google UserInfo")
-        }
-
-        let user = try userResponse.content.decode(GoogleUserInfo.self)
         
         req.session.data["accessToken"] = tokenData.access_token
         if let refreshToken = tokenData.refresh_token {
@@ -97,17 +87,9 @@ public class TokenManager {
         }
         
         req.session.data["expireAt"] = String(expireAt)
-
-        req.session.data["googleID"] = user.sub
-        req.session.data["name"] = user.name
-        req.session.data["email"] = user.email
-        if let picture = user.picture {
-        req.session.data["picture"] = picture
-        }
     }
     
     func getValidAccessToken(req: Request) async throws -> String {
-        print("Session on /api/me:", req.session.data)
         guard let expireString = req.session.data["expireAt"],
               let expireAt = Double(expireString) else {
             throw Abort(.unauthorized, reason: "User haven't signed in")
