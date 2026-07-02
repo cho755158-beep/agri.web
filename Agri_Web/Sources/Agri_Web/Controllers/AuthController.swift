@@ -29,7 +29,7 @@ struct AuthController: RouteCollection, Sendable {
             }
             
             try await req.tokenManager.exchangeCodeForTokens(req: req, code: code)
-            return req.redirect(to: "/dashboard") 
+            return req.redirect(to: "/") 
         }
         
         // API: POST /auth/logout
