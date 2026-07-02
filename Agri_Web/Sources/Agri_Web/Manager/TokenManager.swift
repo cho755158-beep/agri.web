@@ -76,9 +76,12 @@ public class TokenManager {
             req.session.data["refreshToken"] = refreshToken
         }
         req.session.data["expireAt"] = String(expireAt)
+        print("Session after login:", req.session.data)
+        
     }
     
     func getValidAccessToken(req: Request) async throws -> String {
+        print("Session on /api/me:", req.session.data)
         guard let expireString = req.session.data["expireAt"],
               let expireAt = Double(expireString) else {
             throw Abort(.unauthorized, reason: "User haven't signed in")
