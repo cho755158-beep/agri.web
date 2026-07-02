@@ -19,7 +19,8 @@ func configure(_ app: Application) async throws {
     )
     let cors = CORSMiddleware(configuration: corsConfiguration)
     app.middleware.use(cors, at: .beginning)
-    
+
+    app.sessions.use(.memory)
     app.middleware.use(app.sessions.middleware)
     
     try routes(app)
