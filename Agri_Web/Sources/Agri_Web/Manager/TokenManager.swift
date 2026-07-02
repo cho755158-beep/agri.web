@@ -7,6 +7,16 @@
 
 import Vapor
 
+struct GoogleUserInfo: Content {
+    let sub: String
+    let name: String
+    let given_name: String?
+    let family_name: String?
+    let picture: String?
+    let email: String
+    let email_verified: Bool?
+}
+
 struct GoogleOAuthResponse: Content {
     let access_token: String
     let refresh_token: String?
@@ -70,14 +80,30 @@ public class TokenManager {
         
         let tokenData = try response.content.decode(GoogleOAuthResponse.self)
         let expireAt = Date().addingTimeInterval(tokenData.expires_in).timeIntervalSince1970
+
+        let userResponse = try await req.client.get(URI(string: "https://openidconnect.googleapis.com/v1/userinfo")) { clientReq in
+            clientReq.headers.bearerAuthorization = .init(token: tokenData.access_token)
+        }
+
+        guard userResponse.status == .ok else {
+            throw Abort(.badRequest, reason: "Couldn't fetch Google UserInfo")
+        }
+
+        let user = try userResponse.content.decode(GoogleUserInfo.self)
         
         req.session.data["accessToken"] = tokenData.access_token
         if let refreshToken = tokenData.refresh_token {
             req.session.data["refreshToken"] = refreshToken
         }
-        req.session.data["expireAt"] = String(expireAt)
-        print("Session after login:", req.session.data)
         
+        req.session.data["expireAt"] = String(expireAt)
+
+        req.session.data["googleID"] = user.sub
+        req.session.data["name"] = user.name
+        req.session.data["email"] = user.email
+        if let picture = user.picture {
+        req.session.data["picture"] = picture
+        }
     }
     
     func getValidAccessToken(req: Request) async throws -> String {
